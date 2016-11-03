@@ -1,0 +1,12 @@
+{
+  "name": "run.business",
+  "private": true,
+  "engines": {
+    "node": "v0.12.7"
+  },
+  "dependencies": {
+    "connect-assets": "^4.1.0",
+    "express": "4.13.4",
+    "ejs": "2.4.1"
+  }
+}
