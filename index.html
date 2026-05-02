@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>kasharaylo.test.ts — passing</title>
+<meta name="description" content="Constantine Kasharaylo — QA Director. 10+ years of quality leadership for products serving 130B+ users." />
+<meta name="color-scheme" content="dark" />
+<meta name="theme-color" content="#0d1117" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0d12;
+    --surface: #11151c;
+    --surface-2: #161b24;
+    --border: #1f2632;
+    --ink: #e6edf3;
+    --ink-soft: #8b96a7;
+    --ink-faint: #555f72;
+    --pass: #56d364;
+    --pass-soft: rgba(86, 211, 100, 0.12);
+    --warn: #d29922;
+    --accent: #2ead33;
+    --accent-soft: rgba(46, 173, 51, 0.15);
+    --skip: #58a6ff;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: 'Inter', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--mono); font-size: 14px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent); color: #fff; }
+  a { color: var(--skip); text-decoration: none; transition: color .15s; }
+  a:hover { color: var(--accent); }
+
+  .terminal-bar {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 20px;
+    font-size: 12px; color: var(--ink-soft);
+  }
+  .dots { display: flex; gap: 6px; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; background: #30363d; }
+  .dot.r { background: #ff5f57; }
+  .dot.y { background: #febc2e; }
+  .dot.g { background: #28c940; }
+  .term-title { flex: 1; text-align: center; font-size: 12px; color: var(--ink-faint); }
+  .live-status {
+    font-size: 11px; color: var(--pass);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .live-status::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--pass); box-shadow: 0 0 8px var(--pass);
+    animation: blink 1.6s infinite;
+  }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+
+  .container { max-width: 980px; margin: 0 auto; padding: 0 32px; }
+
+  /* HERO */
+  header.hero { padding: 80px 0 56px; border-bottom: 1px dashed var(--border); }
+  .hero .prompt { color: var(--pass); font-size: 13px; margin-bottom: 24px; }
+  .hero .prompt::before { content: '$ '; color: var(--ink-faint); }
+  .hero .cmd { color: var(--ink); }
+  .hero h1 {
+    font-family: var(--sans); font-size: clamp(36px, 6vw, 60px);
+    font-weight: 600; letter-spacing: -0.02em; line-height: 1.05;
+    margin: 16px 0 20px;
+  }
+  .hero h1 .accent { color: var(--accent); }
+  .hero .lede {
+    font-family: var(--sans); font-size: 17px; color: var(--ink-soft);
+    max-width: 640px; line-height: 1.6; margin-bottom: 32px;
+  }
+  .hero .lede strong { color: var(--ink); font-weight: 500; }
+
+  .hero-meta-row {
+    display: flex; flex-wrap: wrap; gap: 24px; align-items: center;
+    margin-top: 24px; font-family: var(--mono); font-size: 12px;
+  }
+  .meta-tag {
+    color: var(--ink-soft);
+    padding: 5px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+  .meta-link {
+    color: var(--accent);
+    border-bottom: 1px solid var(--accent);
+    padding-bottom: 1px;
+  }
+  .meta-link:hover { color: var(--ink); border-color: var(--ink); }
+
+  .summary-bar {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+    background: var(--border); border: 1px solid var(--border);
+    border-radius: 6px; overflow: hidden; margin-top: 32px;
+  }
+  .summary-bar .cell {
+    background: var(--surface); padding: 16px 18px;
+  }
+  .summary-bar .num {
+    font-size: 22px; font-weight: 600; color: var(--ink);
+    font-family: var(--sans); letter-spacing: -0.01em;
+  }
+  .summary-bar .num.pass { color: var(--pass); }
+  .summary-bar .lab {
+    font-size: 11px; color: var(--ink-faint); margin-top: 4px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+
+  /* SECTIONS */
+  section { padding: 56px 0; border-bottom: 1px dashed var(--border); }
+  .file-header {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: var(--ink-soft); margin-bottom: 28px;
+    padding-bottom: 14px; border-bottom: 1px solid var(--border);
+  }
+  .check { color: var(--pass); font-weight: 600; }
+  .file-name { color: var(--ink); }
+  .file-meta { margin-left: auto; color: var(--ink-faint); font-size: 12px; }
+
+  /* TEST BLOCKS */
+  .test-block {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 22px 24px; margin-bottom: 14px;
+    transition: border-color .2s, transform .2s;
+  }
+  .test-block:hover { border-color: var(--pass); }
+  .test-block .desc {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px;
+    font-size: 12.5px; color: var(--ink-soft); margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .test-block .desc .ok { color: var(--pass); }
+  .test-block .desc .when {
+    margin-left: auto; color: var(--ink-faint); font-size: 11.5px;
+    padding: 2px 8px; background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 3px;
+  }
+  .test-block h3 {
+    font-family: var(--sans); font-size: 19px; font-weight: 600;
+    color: var(--ink); margin: 0 0 4px; letter-spacing: -0.01em;
+  }
+  .test-block .role {
+    font-family: var(--mono); font-size: 12px; color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .test-block p {
+    font-family: var(--sans); font-size: 15px; color: var(--ink-soft);
+    margin: 0 0 12px; line-height: 1.6;
+  }
+  .test-block p strong { color: var(--ink); font-weight: 500; }
+  .assertions { list-style: none; padding: 0; margin: 12px 0 0; }
+  .assertions li {
+    font-family: var(--mono); font-size: 12.5px; color: var(--ink-soft);
+    padding: 4px 0 4px 22px; position: relative;
+  }
+  .assertions li::before {
+    content: '✓'; position: absolute; left: 0; color: var(--pass); font-weight: 600;
+  }
+
+  /* STACK */
+  .stack-grid {
+    display: grid; grid-template-columns: 1fr; gap: 0;
+    border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+  }
+  .stack-row {
+    display: grid; grid-template-columns: 200px 1fr;
+    background: var(--surface); padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .stack-row:last-child { border-bottom: none; }
+  .stack-row .key {
+    font-family: var(--mono); font-size: 12px; color: var(--accent);
+    text-transform: lowercase; letter-spacing: 0.04em;
+  }
+  .stack-row .key::before { content: '"'; color: var(--ink-faint); }
+  .stack-row .key::after { content: '":'; color: var(--ink-faint); }
+  .stack-row .val {
+    font-family: var(--mono); font-size: 13px; color: var(--ink);
+    display: flex; flex-wrap: wrap; gap: 4px;
+  }
+  .stack-row .val span { color: var(--ink); }
+  .stack-row .val span:not(:last-child)::after {
+    content: ', '; color: var(--ink-faint); margin-right: 4px;
+  }
+  @media (max-width: 700px) {
+    .stack-row { grid-template-columns: 1fr; gap: 4px; }
+  }
+
+  /* EDU + CERTS */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 22px 24px;
+  }
+  .panel h4 {
+    font-family: var(--mono); font-size: 11px; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    margin: 0 0 16px; font-weight: 600;
+  }
+  .edu-row, .cert-row {
+    padding: 12px 0; border-top: 1px solid var(--border);
+    font-family: var(--sans);
+  }
+  .edu-row:first-of-type, .cert-row:first-of-type { border-top: none; padding-top: 0; }
+  .edu-row .school, .cert-row .nm {
+    font-size: 14px; color: var(--ink); font-weight: 500;
+  }
+  .edu-row .deg {
+    font-size: 13px; color: var(--ink-soft); margin-top: 2px;
+  }
+  .edu-row .yr, .cert-row .meta {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-faint);
+    margin-top: 4px; letter-spacing: 0.04em;
+  }
+  .cert-row .meta .src { color: var(--accent); }
+
+  /* CONTACT */
+  .contact-block {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 32px 28px; margin-top: 24px;
+  }
+  .contact-block .out {
+    font-family: var(--mono); font-size: 13px; color: var(--ink-soft);
+    margin-bottom: 20px;
+  }
+  .contact-block .out span { color: var(--pass); }
+  .contact-block .links {
+    display: flex; flex-wrap: wrap; gap: 24px;
+    padding-top: 20px; border-top: 1px solid var(--border);
+  }
+  .contact-block .links a {
+    font-family: var(--sans); font-size: 16px; color: var(--ink);
+    border-bottom: 1px solid var(--ink-faint);
+    padding-bottom: 2px;
+  }
+  .contact-block .links a:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* FOOTER */
+  footer {
+    padding: 28px 0; font-family: var(--mono); font-size: 11px;
+    color: var(--ink-faint); text-align: center;
+    border-top: 1px solid var(--border);
+  }
+  footer .ok { color: var(--pass); }
+
+  .reveal { opacity: 0; transform: translateY(8px); transition: opacity .5s, transform .5s; }
+  .reveal.visible { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<div class="terminal-bar">
+  <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+  <div class="term-title">~/career — kasharaylo.test.ts</div>
+  <div class="live-status">all green</div>
+</div>
+
+<div class="container">
+
+<header class="hero">
+  <div class="prompt"><span class="cmd">npx playwright test --reporter=html</span></div>
+  <h1>QA Director.<br><span class="accent">10+ years</span> of quality leadership.</h1>
+  <p class="lede">Building and scaling high-performing QA organizations for global products. Hands-on testing through to quality strategy for products serving <strong>130B+ users</strong> and mobile apps with <strong>122M+ daily active users</strong>.</p>
+
+  <div class="hero-meta-row">
+    <span class="meta-tag">Remote · Hybrid · Office</span>
+    <a class="meta-link" href="https://www.linkedin.com/in/kasharaylo" target="_blank" rel="noopener">View LinkedIn profile →</a>
+  </div>
+
+  <div class="summary-bar">
+    <div class="cell"><div class="num pass">10+</div><div class="lab">Years in QA</div></div>
+    <div class="cell"><div class="num">122M+</div><div class="lab">Daily active users</div></div>
+    <div class="cell"><div class="num">3.7K</div><div class="lab">LinkedIn followers</div></div>
+    <div class="cell"><div class="num">40+</div><div class="lab">Projects shipped</div></div>
+  </div>
+</header>
+
+<section>
+  <div class="file-header">
+    <span class="check">✓</span>
+    <span class="file-name">about.spec.ts</span>
+    <span class="file-meta">6 assertions passed · 0 failed</span>
+  </div>
+
+  <div class="test-block reveal">
+    <p>As a dedicated Quality Assurance professional with <strong>over 10 years of experience</strong>, I specialize in ensuring the highest standards of quality for Mobile, Web, and API projects. Currently I hold the position of <strong>Lead QC Engineer</strong>, where I oversee quality control processes, manage a team of skilled QA engineers, and drive the implementation of best practices.</p>
+    <p>I focus on data-driven quality metrics to ensure that "Quality" is a measurable business value — not just a stage in a ticket's lifecycle.</p>
+    <ul class="assertions">
+      <li>Strategic QA Management — building QA departments from scratch, defining long-term roadmaps</li>
+      <li>Efficiency at Scale — optimizing regression for massive-scale systems</li>
+      <li>AQA Frameworks — implementing Playwright &amp; Selenium to reduce time-to-market</li>
+      <li>Leadership &amp; Mentorship — managing teams, performance reviews, technical hiring</li>
+      <li>Technical Depth — manual expertise, AQA architecture (Java/Ruby/TS)</li>
+      <li>Infrastructure Knowledge — K8s, Kafka, AWS/GCP</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="file-header">
+    <span class="check">✓</span>
+    <span class="file-name">stack.config.ts</span>
+    <span class="file-meta">7 modules loaded</span>
+  </div>
+
+  <div class="stack-grid">
+    <div class="stack-row"><div class="key">top_skills</div><div class="val"><span>Mobile Testing</span><span>API Testing</span><span>Team Leadership</span><span>Technical Interview</span></div></div>
+    <div class="stack-row"><div class="key">mobile</div><div class="val"><span>Android SDK</span><span>iOS Testing</span><span>Android Studio</span><span>Xcode</span><span>Genymotion</span><span>Appium</span></div></div>
+    <div class="stack-row"><div class="key">automation</div><div class="val"><span>Playwright</span><span>TypeScript</span><span>Selenium</span><span>Java</span><span>Ruby</span><span>Allure</span><span>Cucumber</span><span>TestNG</span></div></div>
+    <div class="stack-row"><div class="key">api_backend</div><div class="val"><span>Postman</span><span>Newman</span><span>Swagger</span><span>JMeter</span><span>Charles</span><span>Kafka</span><span>Redis</span><span>Kubernetes</span></div></div>
+    <div class="stack-row"><div class="key">ci_cloud</div><div class="val"><span>Jenkins</span><span>GitHub Actions</span><span>Docker</span><span>GCP</span><span>AWS</span></div></div>
+    <div class="stack-row"><div class="key">test_mgmt</div><div class="val"><span>Qase</span><span>TestRail</span><span>Zephyr</span><span>JIRA</span><span>Confluence</span></div></div>
+    <div class="stack-row"><div class="key">data</div><div class="val"><span>SQL</span><span>PostgreSQL</span><span>MySQL</span><span>DynamoDB</span><span>Graylog</span></div></div>
+  </div>
+</section>
+
+<section>
+  <div class="file-header">
+    <span class="check">✓</span>
+    <span class="file-name">experience.spec.ts</span>
+    <span class="file-meta">4 roles · all passing</span>
+  </div>
+
+  <div class="test-block reveal">
+    <div class="desc"><span class="ok">✓</span> describe('SoftServe — Lead QC Engineer')<span class="when">since Feb 2022</span></div>
+    <h3>SoftServe</h3>
+    <div class="role">Lead Quality Control Engineer · Full-time · Ukraine</div>
+    <p>Architected and led the regression strategy for a global platform serving <strong>130 billion users</strong>, ensuring 99.9% release stability. Scaled QA processes for a mobile ecosystem with <strong>122M+ daily active users</strong>, focused on UI/UX excellence and performance under peak loads.</p>
+    <ul class="assertions">
+      <li>Established a center of excellence for technical interviews and performance reviews — significantly improving the quality of engineering hires</li>
+      <li>Managed multi-disciplinary teams; handled performance reviews and stakeholder expectations at the C-suite level</li>
+      <li>Owned regression strategy across API, UI, and Mobile layers; introduced AQA frameworks (Playwright) to reduce time-to-market</li>
+      <li>Delivered QA consulting across product squads and host applications</li>
+    </ul>
+  </div>
+
+  <div class="test-block reveal">
+    <div class="desc"><span class="ok">✓</span> describe('SoftServe — Senior QC Engineer')<span class="when">Dec 2020 – Feb 2022 · 1y 3m</span></div>
+    <h3>SoftServe</h3>
+    <div class="role">Senior Quality Control Engineer · Full-time · Ukraine</div>
+    <p>Owned QA for a large-scale recommendation platform combining backend and mobile-facing services. The system builds personalized recommendations per end-user, internally composed of multiple Java microservices backed by both relational and NoSQL data stores.</p>
+    <ul class="assertions">
+      <li>End-to-end API testing across distributed services with Postman, Newman, and Charles</li>
+      <li>Mobile-side validation across Android and iOS host applications</li>
+      <li>Cross-team coordination with backend, mobile, and product engineering</li>
+      <li>Introduced Allure-based reporting and structured regression cycles</li>
+    </ul>
+  </div>
+
+  <div class="test-block reveal">
+    <div class="desc"><span class="ok">✓</span> describe('mova.io — QA Engineer')<span class="when">Mar 2016 – Nov 2020 · 4y 9m</span></div>
+    <h3>mova.io</h3>
+    <div class="role">Quality Assurance Engineer · Full-time · Ukraine</div>
+    <p>Directed quality efforts across <strong>40+ successful project deliveries</strong> at a mobile-focused product studio — managing multi-disciplinary teams and stakeholder expectations across iOS and Android client work.</p>
+    <ul class="assertions">
+      <li>Built QA processes from scratch for early-stage clients across diverse domains</li>
+      <li>Hands-on iOS and Android testing, plus the supporting QA process design</li>
+      <li>Team management and team composition across simultaneous project streams</li>
+      <li>Bridged client communication, engineering, and design throughout product cycles</li>
+    </ul>
+  </div>
+
+  <div class="test-block reveal">
+    <div class="desc"><span class="ok">✓</span> describe('Root-Nation.com — Content Writer')<span class="when">Jul 2013 – Apr 2016 · 2y 10m</span></div>
+    <h3>Root-Nation.com</h3>
+    <div class="role">Content Writer · Part-time · Ukraine</div>
+    <p>Technical reviews and content writing covering mobile applications and consumer technology.</p>
+    <ul class="assertions">
+      <li>Technical product reviews and editorial content</li>
+      <li>Online journalism with a mobile-tech focus</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="file-header">
+    <span class="check">✓</span>
+    <span class="file-name">education.json</span>
+    <span class="file-meta">2 degrees · 9 certifications</span>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <h4>// education</h4>
+      <div class="edu-row">
+        <div class="school">Ukrainian National Forestry University</div>
+        <div class="deg">Master's degree, Computer Science</div>
+        <div class="yr">2019 — 2021</div>
+      </div>
+      <div class="edu-row">
+        <div class="school">Dnipro University of Technology</div>
+        <div class="deg">Specialist degree, Mechanical Engineering</div>
+        <div class="yr">2010 — 2013</div>
+      </div>
+
+      <h4 style="margin-top: 28px;">// projects</h4>
+      <div class="edu-row">
+        <div class="school">Google Developer Group Ukraine</div>
+        <div class="deg">Information support and organization</div>
+        <div class="yr">2013 — Feb 2016</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h4>// certifications</h4>
+      <div class="cert-row">
+        <div class="nm">Playwright: Web Automation Testing From Zero to Hero</div>
+        <div class="meta"><span class="src">Udemy</span> · Oct 2025</div>
+      </div>
+      <div class="cert-row">
+        <div class="nm">Quality Assurance Leads Program</div>
+        <div class="meta"><span class="src">SoftServe</span> · Jan 2022</div>
+      </div>
+      <div class="cert-row">
+        <div class="nm">Automation Testing with Ruby</div>
+        <div class="meta"><span class="src">SoftServe</span> · Aug 2021</div>
+      </div>
+      <div class="cert-row">
+        <div class="nm">Test Automation with Postman</div>
+        <div class="meta"><span class="src">SoftServe</span> · May 2021</div>
+      </div>
+      <div class="cert-row">
+        <div class="nm">Automation Testing with Java</div>
+        <div class="meta"><span class="src">SoftServe</span> · Jan 2021</div>
+      </div>
+      <div class="cert-row">
+        <div class="nm">SQL Basics</div>
+        <div class="meta"><span class="src">SoftServe</span> · Jun 2021</div>
+      </div>
+      <div class="cert-row">
+        <div class="nm">Fundamentals of Software Testing</div>
+        <div class="meta"><span class="src">Prometheus</span> · 2016</div>
+      </div>
+      <div class="cert-row">
+        <div class="nm">Fundamentals of Web UI Development</div>
+        <div class="meta"><span class="src">Prometheus</span> · Oct 2016</div>
+      </div>
+      <div class="cert-row">
+        <div class="nm">Diving into Software Testing</div>
+        <div class="meta"><span class="src">SkillsUp</span> · Jan 2016</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="file-header">
+    <span class="check">✓</span>
+    <span class="file-name">contact.spec.ts</span>
+    <span class="file-meta">channels available</span>
+  </div>
+
+  <div class="contact-block">
+    <div class="out">
+<span>Test Suite:</span> 1 passed, 0 failed (kasharaylo.test.ts)<br>
+<span>Suites:</span>      ✓ about · ✓ experience · ✓ stack · ✓ education · ✓ contact<br>
+<span>Tests:</span>       ✓ 4 roles, ✓ 9 certifications, ✓ 2 degrees<br>
+<span>Time:</span>        10+ yrs runtime<br>
+<span>Status:</span>      open to work — QA Director / Head of QA
+    </div>
+    <div class="links">
+      <a href="mailto:kasharaylo@gmail.com">kasharaylo@gmail.com</a>
+      <a href="https://www.linkedin.com/in/kasharaylo" target="_blank" rel="noopener">LinkedIn →</a>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <span class="ok">●</span> kasharaylo.com — All systems operational
+</footer>
+
+<script>
+  // Reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // ── Easter egg for the curious (DevTools console) ──────────────
+  const c = console;
+  const green   = 'color:#2ead33;font-weight:bold;';
+  const dim     = 'color:#8b96a7;';
+  const bold    = 'color:#e6edf3;font-weight:bold;';
+  const accent  = 'color:#56d364;';
+  const reset   = 'color:inherit;font-weight:normal;';
+
+  c.log('%c  ', 'font-size:1px;line-height:1px;');
+  c.log(
+    '%cRunning kasharaylo.test.ts ...%c\n',
+    green, reset
+  );
+  c.log('%c✓ %cabout.spec.ts                 %c(6 passed)', accent, bold, dim);
+  c.log('%c✓ %cstack.config.ts               %c(7 modules)', accent, bold, dim);
+  c.log('%c✓ %cexperience.spec.ts            %c(4 roles)',  accent, bold, dim);
+  c.log('%c✓ %ceducation.json                %c(2 degrees · 9 certs)', accent, bold, dim);
+  c.log('%c✓ %ccontact.spec.ts               %c(channels open)', accent, bold, dim);
+  c.log('%c\n  Tests:  %c5 passed, 5 total', dim, bold);
+  c.log('%c  Time:   %c10+ yrs runtime', dim, bold);
+  c.log('%c  Status: %copen to work — QA Director / Head of QA\n', dim, accent);
+  c.log(
+    '%c┌─────────────────────────────────────────────┐\n' +
+    '│  Hiring? Let\'s talk.                         │\n' +
+    '│                                              │\n' +
+    '│  →  kasharaylo@gmail.com                     │\n' +
+    '│  →  linkedin.com/in/kasharaylo               │\n' +
+    '└─────────────────────────────────────────────┘',
+    'color:#56d364;font-family:monospace;line-height:1.4;'
+  );
+  c.log('%c\n(curiosity is a QA superpower — you passed.)\n', 'color:#555f72;font-style:italic;');
+</script>
+</body>
+</html>
